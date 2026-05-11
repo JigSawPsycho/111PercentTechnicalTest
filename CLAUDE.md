@@ -38,19 +38,22 @@ Mechanics to implement:
 ## Project Structure
 ```
 Assets/
-  Scripts/        # gameplay code (currently empty — to be created)
+  Scripts/        # gameplay code (implemented — see breakdown below)
   Scenes/         # SampleScene.unity is the working scene
   Settings/       # URP render pipeline settings
   DouglasAvila/   # CobraRobot sprites + animation clips (HeroSkin, EnemySkin)
+  Generated/      # AnimatorControllers, prefabs, WaveDefinitions produced by the editor builder
 ```
 
-Suggested script organization once code is added:
+Script layout (all namespaces under `HackSlash.*`):
 ```
 Assets/Scripts/
+  Core/           # Faction, IDamageable, Health, Hitbox, GroundCheck, GameManager
   Player/         # PlayerController, PlayerCombat, PlayerHealth
   Enemies/        # EnemyBase, MeleeEnemy, RangedEnemy, Projectile
-  Waves/          # WaveSpawner, WaveDefinition (ScriptableObject)
-  Core/           # GameManager, HitboxReceiver, Health component
+  Waves/          # WaveDefinition (SO), WaveSpawner
+  UI/             # HUD
+  Editor/         # SampleSceneBuilder (menu: 111Percent → Build Sample Scene)
 ```
 
 ## Conventions
@@ -61,8 +64,58 @@ Assets/Scripts/
 - Reuse `EnemyBase` for shared enemy behavior (health, hit reaction, death)
 
 ## Current State
-- Project is scaffolded; URP, Input System, and 2D toolchain are configured
-- CobraRobot sprites and animation clips are imported (HeroSkin + EnemySkin)
-- `Assets/Scripts/` is empty — all gameplay code is still to be written
-- `SampleScene` is the starting scene
-- No prefabs yet — player/enemy prefabs will be built using the existing sprites and clips
+
+### Implemented
+
+**Core (`HackSlash.Core`)**
+- `Faction` enum (Player / Enemy)
+- `IDamageable` + `DamageInfo` struct (amount, source faction, origin, knockback)
+- `Health` — HP, invulnerability window, `Damaged` / `Died` events, faction-aware damage filtering, `InvulnerableOverride` for dodge i-frames
+- `Hitbox` — manual `Physics2D.OverlapBoxNonAlloc` strike, owner-faction filter, per-swing dedupe so a single swing can't double-hit, gizmo
+- `GroundCheck` — overlap-circle probe driven from `FixedUpdate`
+- `GameManager` — singleton, player registration, scene restart on player death and on all-waves-cleared
+
+**Player (`HackSlash.Player`)**
+- `PlayerController` — new Input System via `PlayerInput` SendMessages (`OnMove`/`OnJump`/`OnAttack`/`OnDodge`); fixed-speed horizontal movement, single jump w/ grounded check, dodge (burst velocity + i-frames + cooldown); writes `Speed`/`Grounded`/`VerticalVelocity` to the Animator; auto-registers with `GameManager`
+- `PlayerCombat` — 2-hit combo (`Attack_Punch` → `Attack_Whip`), input buffering during the active swing, combo window after, timer-based strike (no animation events required)
+- `PlayerHealth` — wraps `Health`, fires `Hurt` trigger / `Dead` bool on the Animator, dodge invulnerability hook, brief hitstun
+
+**Enemies (`HackSlash.Enemies`)**
+- `EnemyBase` — abstract: shared health, hitstun, knockback, facing, locomotion-anim wiring, corpse cleanup, `Defeated` event, virtual `CancelAttack()` hook
+- `MeleeEnemy` — chase → windup → timer-driven strike → recovery → cooldown. `CancelAttack` drops the pending strike when interrupted, so getting hit mid-windup negates damage.
+- `RangedEnemy` — kites to a preferred distance, retreats inside a closer band, windup → timer-driven projectile spawn → recovery. Same interrupt behavior.
+- `Projectile` — kinematic 2D rigidbody, layer-masked trigger, faction-checked damage, despawn on solid or on hit
+
+**Waves (`HackSlash.Waves`)**
+- `WaveDefinition` ScriptableObject — list of `WaveEntry { kind, count }`, `spawnInterval`, `startDelay`
+- `WaveSpawner` — coroutine-driven; each wave waits for `startDelay`, drips spawns at `spawnInterval`, then blocks on `AliveEnemies == 0` before the next wave; fires `WaveStarted` / `WaveCleared` / `AllWavesCleared`
+
+**UI (`HackSlash.UI`)**
+- `HUD` — health bar, wave label, status label (defeated/victory)
+
+**Editor tooling**
+- `SampleSceneBuilder` — menu **111Percent → Build Sample Scene**. One click generates:
+  - `Assets/Generated/Animators/` — `HeroAnimator`, `MeleeEnemyAnimator`, `RangedEnemyAnimator` (states + parameters + transitions wired to the existing `.anim` clips)
+  - `Assets/Generated/Prefabs/` — `Player`, `MeleeEnemy`, `RangedEnemy`, `Projectile`
+  - `Assets/Generated/Waves/` — `Wave1`, `Wave2`, `Wave3` (ramping difficulty)
+  - Rebuilds `SampleScene` with camera, ground + walls, 3 spawn points, player, `GameManager`, `WaveSpawner`, HUD canvas, and an `EventSystem` driven by `InputSystemUIInputModule`
+- Ensures custom layers `Ground` (6) / `Player` (7) / `Enemy` (8) / `Projectile` (9) exist in the Tag Manager
+
+**Input**
+- Added a `Dodge` action to `InputSystem_Actions.inputactions` bound to **Left Shift** (keyboard) and **gamepad east button**
+
+### Controls
+- **WASD / Arrows** — move
+- **Space / Gamepad South** — jump
+- **Left Click / Enter / Gamepad West** — attack (combos)
+- **Left Shift / Gamepad East** — dodge
+
+### How to run
+1. Open the project in Unity 6000.3.15f1
+2. Let scripts compile
+3. Top menu → **111Percent → Build Sample Scene**
+4. Open `Assets/Scenes/SampleScene` and press Play
+
+### Notes
+- Strikes are fired on timers (`strikeTimings` on `PlayerCombat`, `attackWindup` on enemies) rather than animation events, so the existing `.anim` clips don't need to be modified.
+- The editor builder is idempotent: running it again wipes `SampleScene`'s contents and regenerates everything in `Assets/Generated/`.
