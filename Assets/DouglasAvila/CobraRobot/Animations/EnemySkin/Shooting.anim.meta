@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b8869ff92d804fa4990eaf6ef6392161
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/EnemySkin/Shooting.anim
+  uploadId: 646673

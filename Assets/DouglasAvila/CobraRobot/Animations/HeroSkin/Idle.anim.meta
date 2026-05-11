@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 43ec38bfe3140e244aac7aef065a85ce
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/HeroSkin/Idle.anim
+  uploadId: 646673

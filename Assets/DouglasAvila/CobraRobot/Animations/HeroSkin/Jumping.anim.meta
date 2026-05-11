@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f3d9c400636557b4daf935f75260f495
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/HeroSkin/Jumping.anim
+  uploadId: 646673

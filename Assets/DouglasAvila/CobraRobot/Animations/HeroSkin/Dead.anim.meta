@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 86ff0aa5dd1b8984582b9d8e06570d11
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/HeroSkin/Dead.anim
+  uploadId: 646673

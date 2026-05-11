@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ef7b2dc25c560934b9e6f756dadaeb6c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/EnemySkin/Jumping.anim
+  uploadId: 646673

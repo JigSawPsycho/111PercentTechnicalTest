@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a182152ceac0a9f4bb308bea8bb75eb0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/EnemySkin/Dead.anim
+  uploadId: 646673

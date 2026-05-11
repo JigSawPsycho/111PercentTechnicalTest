@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5f27e1881c640694f816a3e3d77d4f04
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/EnemySkin/Idle.anim
+  uploadId: 646673

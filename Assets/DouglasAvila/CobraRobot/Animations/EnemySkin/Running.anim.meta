@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 42c6cebb113e2b7448dde6e36bdb9c58
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/EnemySkin/Running.anim
+  uploadId: 646673

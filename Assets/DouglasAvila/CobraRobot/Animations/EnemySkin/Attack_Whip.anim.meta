@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5df6bb5b8ee47cb48a818105964962f0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/EnemySkin/Attack_Whip.anim
+  uploadId: 646673

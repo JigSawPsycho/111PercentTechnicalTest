@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f78358f3c1d8e8f4d89bac546f98d3b0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/HeroSkin/Damaged.anim
+  uploadId: 646673

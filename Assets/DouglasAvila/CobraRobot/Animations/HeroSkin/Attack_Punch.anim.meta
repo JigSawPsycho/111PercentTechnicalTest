@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d980df4f7467f1c47aeed3a095297332
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 277703
+  packageName: Cobra Robot - Character Pack
+  packageVersion: 1.0.0
+  assetPath: Assets/DouglasAvila/CobraRobot/Animations/HeroSkin/Attack_Punch.anim
+  uploadId: 646673
