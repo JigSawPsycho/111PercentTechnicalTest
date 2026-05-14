@@ -15,5 +15,6 @@ MonoBehaviour:
   entries:
   - kind: 0
     count: 2
-  spawnInterval: 0.4
+    spawnInterval: 0.4
+  entryInterval: 1
   startDelay: 1.5

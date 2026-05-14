@@ -15,11 +15,15 @@ MonoBehaviour:
   entries:
   - kind: 0
     count: 10
+    spawnInterval: 0.4
   - kind: 1
     count: 3
+    spawnInterval: 0.4
   - kind: 1
     count: 3
+    spawnInterval: 0.4
   - kind: 1
     count: 3
-  spawnInterval: 2
+    spawnInterval: 0.4
+  entryInterval: 1
   startDelay: 2.5

@@ -25,6 +25,7 @@ Mechanics to implement:
 - **Jump:** single jump with grounded check
 - **Melee combo:** 2-hit chain (e.g. `Attack_Punch` → `Attack_Whip`); second hit only chains within a short input window after the first
 - **Dodge:** short burst of invulnerability + displacement, on cooldown
+- **Charge Dash (secondary):** hold right-click for 0.5s — sprite flashes during the charge, then the player dashes forward 1.5× the dodge distance with i-frames, damaging every enemy crossed once
 
 ### Enemies (2 types)
 - **Melee Enemy:** approaches the player and performs a close-range attack when in range
@@ -76,7 +77,7 @@ Assets/Scripts/
 - `GameManager` — singleton, player registration, scene restart on player death and on all-waves-cleared
 
 **Player (`HackSlash.Player`)**
-- `PlayerController` — new Input System via `PlayerInput` SendMessages (`OnMove`/`OnJump`/`OnAttack`/`OnDodge`); fixed-speed horizontal movement, single jump w/ grounded check, dodge (burst velocity + i-frames + cooldown); writes `Speed`/`Grounded`/`VerticalVelocity` to the Animator; auto-registers with `GameManager`
+- `PlayerController` — new Input System via `PlayerInput` SendMessages (`OnMove`/`OnJump`/`OnAttack`/`OnDodge`/`OnSecondaryAttack`); fixed-speed horizontal movement, single jump w/ grounded check, dodge (burst velocity + i-frames + cooldown), charge-dash secondary (hold-to-charge, sprite color flash, then horizontal dash at 1.5× dodge distance with i-frames and per-enemy-once damage scan); writes `Speed`/`Grounded`/`VerticalVelocity` to the Animator; auto-registers with `GameManager`
 - `PlayerCombat` — 2-hit combo (`Attack_Punch` → `Attack_Whip`), input buffering during the active swing, combo window after, timer-based strike (no animation events required)
 - `PlayerHealth` — wraps `Health`, fires `Hurt` trigger / `Dead` bool on the Animator, dodge invulnerability hook, brief hitstun
 
@@ -87,8 +88,8 @@ Assets/Scripts/
 - `Projectile` — kinematic 2D rigidbody, layer-masked trigger, faction-checked damage, despawn on solid or on hit
 
 **Waves (`HackSlash.Waves`)**
-- `WaveDefinition` ScriptableObject — list of `WaveEntry { kind, count }`, `spawnInterval`, `startDelay`
-- `WaveSpawner` — coroutine-driven; each wave waits for `startDelay`, drips spawns at `spawnInterval`, then blocks on `AliveEnemies == 0` before the next wave; fires `WaveStarted` / `WaveCleared` / `AllWavesCleared`
+- `WaveDefinition` ScriptableObject — list of `WaveEntry { kind, count, spawnInterval }`, `entryInterval`, `startDelay`
+- `WaveSpawner` — coroutine-driven; each wave waits for `startDelay`, drips spawns inside each entry at the entry's `spawnInterval`, gaps between entries at `entryInterval`, then blocks on `AliveEnemies == 0` before the next wave; fires `WaveStarted` / `WaveCleared` / `AllWavesCleared`
 
 **UI (`HackSlash.UI`)**
 - `HUD` — health bar, wave label, status label (defeated/victory)
@@ -103,12 +104,14 @@ Assets/Scripts/
 
 **Input**
 - Added a `Dodge` action to `InputSystem_Actions.inputactions` bound to **Left Shift** (keyboard) and **gamepad east button**
+- Added a `SecondaryAttack` action bound to **Right Mouse Button** and **gamepad right shoulder** — handler receives both press and release via `PlayerInput` SendMessages, so the charge can be cancelled by releasing before the 0.5s threshold
 
 ### Controls
 - **WASD / Arrows** — move
 - **Space / Gamepad South** — jump
 - **Left Click / Enter / Gamepad West** — attack (combos)
 - **Left Shift / Gamepad East** — dodge
+- **Right Click / Gamepad Right Shoulder** — hold to charge, release-fires charge-dash at 0.5s held
 
 ### How to run
 1. Open the project in Unity 6000.3.15f1

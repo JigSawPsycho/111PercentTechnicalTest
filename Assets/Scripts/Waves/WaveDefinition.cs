@@ -12,16 +12,18 @@ namespace HackSlash.Waves
     {
         public EnemyKind kind;
         [Min(1)] public int count;
+        [Tooltip("Seconds between individual spawns inside this entry.")]
+        [Min(0f)] public float spawnInterval;
     }
 
     [CreateAssetMenu(menuName = "HackSlash/Wave Definition", fileName = "Wave")]
     public class WaveDefinition : ScriptableObject
     {
-        [Tooltip("Composition for this wave — each entry spawns `count` enemies of `kind`.")]
+        [Tooltip("Composition for this wave — each entry spawns `count` enemies of `kind` at its own `spawnInterval`.")]
         public List<WaveEntry> entries = new();
 
-        [Tooltip("Seconds between individual spawns inside this wave.")]
-        [Min(0f)] public float spawnInterval = 0.4f;
+        [Tooltip("Seconds between consecutive entries in this wave (does not apply before the first entry).")]
+        [Min(0f)] public float entryInterval = 1f;
 
         [Tooltip("Seconds to wait after the previous wave is cleared before this one starts.")]
         [Min(0f)] public float startDelay = 1.5f;

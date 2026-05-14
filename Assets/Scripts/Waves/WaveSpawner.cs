@@ -77,9 +77,14 @@ namespace HackSlash.Waves
                 for (int i = 0; i < entry.count; i++)
                 {
                     SpawnOne(entry.kind);
-                    if (wave.spawnInterval > 0f)
-                        yield return new WaitForSeconds(wave.spawnInterval);
+                    bool moreInEntry = i < entry.count - 1;
+                    if (moreInEntry && entry.spawnInterval > 0f)
+                        yield return new WaitForSeconds(entry.spawnInterval);
                 }
+
+                bool moreEntries = e < wave.entries.Count - 1;
+                if (moreEntries && wave.entryInterval > 0f)
+                    yield return new WaitForSeconds(wave.entryInterval);
             }
             spawning = false;
         }
