@@ -105,6 +105,7 @@ GameObject:
   - component: {fileID: 1111111111111111103}
   - component: {fileID: 1111111111111111104}
   - component: {fileID: 1111111111111111105}
+  - component: {fileID: 3883446837722383928}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -250,7 +251,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80c2ed37717f35543a588d2c56141a12, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Player.PlayerController
   moveSpeed: 6
   jumpForce: 12
@@ -264,104 +265,6 @@ MonoBehaviour:
   speedParam: Speed
   groundedParam: Grounded
   verticalVelocityParam: VerticalVelocity
---- !u!114 &1111111111111111101
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6776614759536009510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d64e271be2e24ba5861781babe2f8561, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.PunchAbility
-  cooldown: 0
-  windup: 0.15
-  recovery: 0.2
-  animator: {fileID: 4425172382576563034}
-  animatorTrigger: Attack1
-  hitbox: {fileID: 2405992430950223043}
---- !u!114 &1111111111111111102
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6776614759536009510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d924a415ee324889a259ebe3e67a0c57, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.WhipAbility
-  cooldown: 0
-  windup: 0.18
-  recovery: 0.27
-  animator: {fileID: 4425172382576563034}
-  animatorTrigger: Attack2
-  hitbox: {fileID: 2405992430950223043}
-  coordinator: {fileID: 1111111111111111103}
---- !u!114 &1111111111111111103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6776614759536009510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2eed91b0411049b4a50ec01f1dd8149b, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.MeleeComboCoordinator
-  first: {fileID: 1111111111111111101}
-  second: {fileID: 1111111111111111102}
-  comboWindow: 0.45
---- !u!114 &1111111111111111104
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6776614759536009510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f083c54a4578474f92a650051b94818c, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.DodgeAbility
-  cooldown: 0.9
-  dodgeSpeed: 14
-  dodgeDuration: 0.25
-  rb: {fileID: 7297478557727202954}
-  health: {fileID: 4162566430663244740}
---- !u!114 &1111111111111111105
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6776614759536009510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81c2bdf48fac45cdaabaa8b57d45a13f, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.ChargeDashAbility
-  cooldown: 1.5
-  chargeDuration: 0.5
-  baseDashSpeed: 14
-  baseDashDuration: 0.25
-  distanceMultiplier: 1.5
-  speedMultiplier: 2
-  flashColor: {r: 1, g: 0.45, b: 0.15, a: 1}
-  flashHz: 8
-  damage: 25
-  knockback: 6
-  hitSize: {x: 1.6, y: 1.8}
-  targetMask:
-    serializedVersion: 2
-    m_Bits: 256
-  rb: {fileID: 7297478557727202954}
-  health: {fileID: 4162566430663244740}
-  flashSprite: {fileID: 8527670011070867835}
 --- !u!114 &2007910264414420739
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -392,6 +295,129 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &1111111111111111101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6776614759536009510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d64e271be2e24ba5861781babe2f8561, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.PunchAbility
+  cooldown: 0
+  windup: 0.15
+  recovery: 0.2
+  animator: {fileID: 4425172382576563034}
+  animatorTrigger: Attack1
+  hitbox: {fileID: 2405992430950223043}
+--- !u!114 &1111111111111111102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6776614759536009510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d924a415ee324889a259ebe3e67a0c57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.WhipAbility
+  cooldown: 0
+  windup: 0.18
+  recovery: 0.27
+  animator: {fileID: 4425172382576563034}
+  animatorTrigger: Attack2
+  hitbox: {fileID: 2405992430950223043}
+  coordinator: {fileID: 1111111111111111103}
+--- !u!114 &1111111111111111103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6776614759536009510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2eed91b0411049b4a50ec01f1dd8149b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.MeleeComboCoordinator
+  first: {fileID: 1111111111111111101}
+  second: {fileID: 1111111111111111102}
+  comboWindow: 0.45
+--- !u!114 &1111111111111111104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6776614759536009510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f083c54a4578474f92a650051b94818c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.DodgeAbility
+  cooldown: 0.9
+  dodgeSpeed: 14
+  dodgeDuration: 0.25
+  rb: {fileID: 7297478557727202954}
+  health: {fileID: 4162566430663244740}
+--- !u!114 &1111111111111111105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6776614759536009510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81c2bdf48fac45cdaabaa8b57d45a13f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.ChargeDashAbility
+  cooldown: 1.5
+  chargeDuration: 0.5
+  baseDashSpeed: 14
+  baseDashDuration: 0.25
+  distanceMultiplier: 1.5
+  speedMultiplier: 2
+  flashColor: {r: 1, g: 0.45, b: 0.15, a: 1}
+  flashHz: 8
+  damage: 25
+  knockback: 6
+  hitSize: {x: 1.6, y: 1.8}
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 256
+  rb: {fileID: 7297478557727202954}
+  health: {fileID: 4162566430663244740}
+  flashSprite: {fileID: 8527670011070867835}
+--- !u!114 &3883446837722383928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6776614759536009510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 403031c5fa588734997a4d270978be17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.UnstoppableAbility
+  cooldown: 0
+  chargePerHit: 10
+  maxCharge: 100
+  unstoppableDuration: 5
+  goldColor: {r: 1, g: 0.84, b: 0.42, a: 1}
+  tintAmount: 0.5
+  haloMaxAlpha: 0.7
+  haloMinAlpha: 0.3
+  tintPulseHz: 3
+  endgamePulseHz: 8
+  endgameThresholdSeconds: 1
+  health: {fileID: 0}
+  bodySprite: {fileID: 0}
 --- !u!1 &7065657276726369596
 GameObject:
   m_ObjectHideFlags: 0

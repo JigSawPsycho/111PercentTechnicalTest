@@ -73,5 +73,11 @@ namespace HackSlash.Core
             if (!IsAlive) return;
             current = Mathf.Min(maxHealth, current + amount);
         }
+
+        public void RestoreToFull()
+        {
+            if (!IsAlive) return;
+            current = maxHealth;
+        }
     }
 }

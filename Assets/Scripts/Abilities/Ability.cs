@@ -22,6 +22,17 @@ namespace HackSlash.Abilities
         public virtual bool IsLocked => IsActive;
         public float ActiveUntil => activeUntil;
 
+        public float CooldownProgress
+        {
+            get
+            {
+                if (cooldown <= 0f) return 1f;
+                float remaining = readyAt - Time.time;
+                if (remaining <= 0f) return 1f;
+                return 1f - Mathf.Clamp01(remaining / cooldown);
+            }
+        }
+
         protected virtual void Awake()
         {
             if (owner == null) owner = GetComponentInParent<IAbilityOwner>();
@@ -53,6 +64,11 @@ namespace HackSlash.Abilities
         protected void StartCooldown()
         {
             readyAt = Time.time + cooldown;
+        }
+
+        public void ResetCooldown()
+        {
+            readyAt = 0f;
         }
 
         protected void SetActive(float duration)

@@ -1,5 +1,6 @@
 using HackSlash.Abilities;
 using HackSlash.Core;
+using HackSlash.Waves;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -22,6 +23,7 @@ namespace HackSlash.Player
         [SerializeField] private MeleeComboCoordinator combo;
         [SerializeField] private DodgeAbility dodge;
         [SerializeField] private ChargeDashAbility chargeDash;
+        [SerializeField] private UnstoppableAbility unstoppable;
 
         [Header("Animator Params")]
         [SerializeField] private string speedParam = "Speed";
@@ -32,6 +34,8 @@ namespace HackSlash.Player
         private float moveInput;
         private bool jumpQueued;
         private int facing = 1;
+        private WaveSpawner waveSpawner;
+        private Health health;
 
         public Faction Faction => Faction.Player;
         public int Facing => facing;
@@ -47,16 +51,30 @@ namespace HackSlash.Player
             rb = GetComponent<Rigidbody2D>();
             rb.freezeRotation = true;
             if (animator == null && spriteRoot != null) animator = spriteRoot.GetComponent<Animator>();
+            if (unstoppable == null) unstoppable = GetComponentInChildren<UnstoppableAbility>();
+            health = GetComponent<Health>();
         }
 
         private void Start()
         {
             var gm = GameManager.Instance;
             if (gm != null)
-            {
-                var health = GetComponent<Health>();
                 gm.RegisterPlayer(transform, health);
-            }
+
+            waveSpawner = FindFirstObjectByType<WaveSpawner>();
+            if (waveSpawner != null) waveSpawner.WaveCleared += OnWaveCleared;
+        }
+
+        private void OnDestroy()
+        {
+            if (waveSpawner != null) waveSpawner.WaveCleared -= OnWaveCleared;
+        }
+
+        private void OnWaveCleared(int _)
+        {
+            if (health != null) health.RestoreToFull();
+            if (chargeDash != null) chargeDash.ResetCooldown();
+            if (unstoppable != null) unstoppable.ResetCharge();
         }
 
         public void OnMove(InputValue value)

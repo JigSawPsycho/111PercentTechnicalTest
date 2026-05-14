@@ -115,7 +115,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 9fe4c939387124340b883ebd9bc0f898, type: 3}
-  m_Color: {r: 0.8, g: 0.85, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.93979645, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -317,7 +317,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1a0491d2c215431cbb13c2656334d9c6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.ShootAbility
   cooldown: 1.8
   windup: 0.3

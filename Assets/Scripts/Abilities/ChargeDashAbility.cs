@@ -38,6 +38,12 @@ namespace HackSlash.Abilities
         public bool IsCharging => charging;
         public bool IsDashing => IsActive;
         public override bool IsLocked => IsCharging || IsActive;
+        public float ChargeDuration => chargeDuration;
+        public float ChargeProgress => charging
+            ? Mathf.Clamp01((Time.time - chargeStartedAt) / Mathf.Max(0.0001f, chargeDuration))
+            : 0f;
+
+        public event System.Action<IDamageable> DashHit;
 
         protected override void Awake()
         {
@@ -126,6 +132,7 @@ namespace HackSlash.Abilities
                     Origin = center,
                     Knockback = dir * knockback
                 });
+                DashHit?.Invoke(dmg);
             }
         }
 

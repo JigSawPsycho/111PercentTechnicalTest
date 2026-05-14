@@ -9,6 +9,7 @@ namespace HackSlash.Player
         [SerializeField] private Animator animator;
         [SerializeField] private string hurtTrigger = "Hurt";
         [SerializeField] private string deadBool = "Dead";
+        [SerializeField] private float corpseLifetime = 1.5f;
 
         private Health health;
 
@@ -54,7 +55,10 @@ namespace HackSlash.Player
             if (animator != null) animator.SetBool(deadBool, true);
             var rb = GetComponent<Rigidbody2D>();
             if (rb != null) rb.linearVelocity = Vector2.zero;
+            foreach (var col in GetComponentsInChildren<Collider2D>())
+                col.enabled = false;
             enabled = false;
+            Destroy(gameObject, corpseLifetime);
         }
     }
 }

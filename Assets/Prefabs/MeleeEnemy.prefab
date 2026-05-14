@@ -315,7 +315,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9016a99c55944f6a9b631e19a657f9cd, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.MeleeSwingAbility
   cooldown: 1.2
   windup: 0.25
@@ -369,8 +369,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Core.Hitbox
   owner: 1
   damage: 12
-  size: {x: 1.2, y: 1.1}
-  offset: {x: 0.8, y: -0.46}
+  size: {x: 1.43, y: 1.1}
+  offset: {x: 0.95, y: -0.46}
   targetMask:
     serializedVersion: 2
     m_Bits: 128

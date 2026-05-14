@@ -21,12 +21,25 @@ namespace HackSlash.Waves
         [SerializeField] private EnemyBase rangedPrefab;
 
         private readonly HashSet<EnemyBase> live = new();
+        // Remember the kind each live enemy was spawned as so we can attribute the
+        // kill to the correct icon column when it dies — the HUD's enemy tracker
+        // needs per-type kill counts, not just a total.
+        private readonly Dictionary<EnemyBase, EnemyKind> kindByEnemy = new();
         private int waveIndex = -1;
+        private int killedThisWave;
+        private int meleeKilledThisWave;
+        private int rangedKilledThisWave;
         private bool spawning;
 
         public int WaveIndex => waveIndex;
         public int WaveCount => waves.Count;
         public int AliveEnemies => live.Count;
+        public int EnemiesKilledThisWave => killedThisWave;
+        public int MeleeKilledThisWave => meleeKilledThisWave;
+        public int RangedKilledThisWave => rangedKilledThisWave;
+        public WaveDefinition CurrentWave =>
+            (waveIndex >= 0 && waveIndex < waves.Count) ? waves[waveIndex] : null;
+        public int CurrentWaveTotal => CurrentWave != null ? CurrentWave.TotalEnemies : 0;
         public bool AllWavesDone => waveIndex >= waves.Count;
 
         public event Action<int> WaveStarted;
@@ -54,6 +67,9 @@ namespace HackSlash.Waves
                 if (wave.startDelay > 0f)
                     yield return new WaitForSeconds(wave.startDelay);
 
+                killedThisWave = 0;
+                meleeKilledThisWave = 0;
+                rangedKilledThisWave = 0;
                 WaveStarted?.Invoke(waveIndex);
                 yield return SpawnWave(wave);
 
@@ -98,6 +114,7 @@ namespace HackSlash.Waves
             Transform point = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
             var enemy = Instantiate(prefab, point.position, Quaternion.identity);
             live.Add(enemy);
+            kindByEnemy[enemy] = kind;
             enemy.Defeated += OnEnemyDefeated;
         }
 
@@ -105,6 +122,13 @@ namespace HackSlash.Waves
         {
             enemy.Defeated -= OnEnemyDefeated;
             live.Remove(enemy);
+            killedThisWave++;
+            if (kindByEnemy.TryGetValue(enemy, out var kind))
+            {
+                if (kind == EnemyKind.Melee) meleeKilledThisWave++;
+                else rangedKilledThisWave++;
+                kindByEnemy.Remove(enemy);
+            }
         }
     }
 }

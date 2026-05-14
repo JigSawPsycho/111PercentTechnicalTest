@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Lives in its own UIDocument so its root inherits dimensions directly
+         from the panel rather than through the NeonHUD root, which fails to
+         propagate size to absolute children (see HUD.uss `.ult-frame` note).
+         Shares HUD.uss so `.input-strip` / `.ks*` styling stays in one place. -->
+    <Style src="HUD.uss" />
+    <ui:VisualElement name="input-strip" class="input-strip" picking-mode="Ignore">
+        <ui:VisualElement class="ks">
+            <ui:Label text="WASD" class="ks-key" />
+            <ui:Label text="MOVE" class="ks-lbl" />
+        </ui:VisualElement>
+        <ui:VisualElement class="ks">
+            <ui:Label text="SPACE" class="ks-key" />
+            <ui:Label text="JUMP" class="ks-lbl" />
+        </ui:VisualElement>
+        <ui:VisualElement class="ks">
+            <ui:Label text="LMB" class="ks-key" />
+            <ui:Label text="ATTACK" class="ks-lbl" />
+        </ui:VisualElement>
+        <ui:VisualElement class="ks">
+            <ui:Label text="SHIFT" class="ks-key" />
+            <ui:Label text="DODGE" class="ks-lbl" />
+        </ui:VisualElement>
+        <!-- Last entry: suppress the .ks `border-right` divider inline so the
+             strip doesn't end on a trailing `|`. USS has no :last-child, so
+             this is the simplest one-off override. -->
+        <ui:VisualElement class="ks" style="border-right-width: 0; margin-right: 0; padding-right: 0;">
+            <ui:Label text="RMB" class="ks-key" />
+            <ui:Label text="CHARGE" class="ks-lbl" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

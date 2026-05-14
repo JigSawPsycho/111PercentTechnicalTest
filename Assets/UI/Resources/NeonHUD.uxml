@@ -1,0 +1,150 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:hs="HackSlash.UI">
+    <Style src="HUD.uss" />
+    <ui:VisualElement name="root" class="game" picking-mode="Ignore">
+
+        <!-- Optional scanline overlay; HudController toggles `scan` class -->
+        <ui:VisualElement name="scanlines" class="scanlines" picking-mode="Ignore" />
+
+
+        <!-- ============ TOP-LEFT: player panel ============ -->
+        <ui:VisualElement class="hud hud-tl" picking-mode="Ignore">
+            <ui:VisualElement name="player-panel" class="player-panel" picking-mode="Ignore">
+
+                <ui:VisualElement class="portrait">
+                    <hs:CutCornerFrame name="portrait-frame" class="portrait-frame">
+                        <ui:VisualElement class="portrait-inner">
+                            <ui:VisualElement name="portrait-silhouette" class="portrait-silhouette" />
+                            <ui:VisualElement class="portrait-scan" />
+                        </ui:VisualElement>
+                    </hs:CutCornerFrame>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="player-stats">
+
+                    <ui:VisualElement class="player-id">
+                        <ui:Label name="player-name" text="RAVEN KOJIMA" class="player-name" />
+                    </ui:VisualElement>
+
+                    <!-- HP row -->
+                    <ui:VisualElement class="bar-row">
+                        <ui:VisualElement class="bar-label">
+                            <ui:Label text="HP" class="bar-tag" />
+                            <ui:VisualElement class="bar-val-row">
+                                <ui:Label name="hp-val" text="000" class="bar-val mono" />
+                                <ui:Label name="hp-max" text="/000" class="bar-max mono" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <hs:SkewedBar name="hp-bar" class="bar hp-bar" notches="true" />
+                    </ui:VisualElement>
+
+                    <!-- Charge row -->
+                    <ui:VisualElement class="bar-row">
+                        <ui:VisualElement class="bar-label">
+                            <ui:Label text="CHARGE" class="bar-tag chg" />
+                            <ui:Label name="chg-val" text="0%" class="bar-val mono" />
+                        </ui:VisualElement>
+                        <hs:SkewedBar name="chg-bar" class="bar chg-bar" />
+                        <ui:VisualElement class="ability-icons">
+                            <ui:VisualElement name="ability-charge" class="ability charge" tooltip="Charge Dash (RMB)">
+                                <ui:Label text="◈" class="ab-glyph" />
+                                <ui:Label text="RMB" class="ab-key" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="ability-dodge" class="ability dodge" tooltip="Dodge (Shift)">
+                                <ui:Label text="✦" class="ab-glyph" />
+                                <ui:Label text="SHIFT" class="ab-key" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Ultimate row -->
+                    <ui:VisualElement name="ult-row" class="bar-row ult-row">
+                        <ui:VisualElement class="bar-label">
+                            <ui:Label text="ULTIMATE" class="bar-tag ult" />
+                            <ui:Label name="ult-val" text="0%" class="bar-val mono" />
+                        </ui:VisualElement>
+                        <hs:SkewedBar name="ult-bar" class="bar ult-bar" />
+                        <ui:VisualElement class="ability-icons">
+                            <ui:VisualElement name="ability-ult" class="ability ult" tooltip="Unstoppable (passive)">
+                                <ui:Label text="◆" class="ab-glyph" />
+                                <ui:Label text="PASV" class="ab-key passive" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============ TOP-RIGHT: wave panel ============ -->
+        <ui:VisualElement class="hud hud-tr" picking-mode="Ignore">
+            <ui:VisualElement name="wave-panel" class="wave-panel" picking-mode="Ignore">
+
+                <ui:VisualElement class="wave-header">
+                    <ui:Label name="wave-eyebrow" text="DISTRICT 7 · LOWER NEON" class="wave-eyebrow" />
+                    <ui:VisualElement class="wave-title">
+                        <ui:Label text="WAVE" class="wave-word" />
+                        <ui:Label name="wave-num" text="00" class="wave-num" />
+                        <ui:Label name="wave-of" text="/00" class="wave-of" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="wave-progress">
+                    <ui:VisualElement name="wave-pips" class="wave-pips" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="enemy-tracker" class="enemy-tracker">
+                    <ui:VisualElement class="enemy-tracker-corner" />
+
+                    <ui:VisualElement class="enemy-head">
+                        <ui:Label text="HOSTILES REMAINING" class="et-label" />
+                        <ui:VisualElement class="et-count">
+                            <ui:Label name="et-now" text="00" class="et-now" />
+                            <ui:Label text="/" class="et-sep" />
+                            <ui:Label name="et-tot" text="00" class="et-tot" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="enemy-bar-row">
+                        <ui:VisualElement class="enemy-bar-track">
+                            <ui:VisualElement name="enemy-bar-fill" class="enemy-bar-fill" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="enemy-icons" class="enemy-icons" />
+
+                    <ui:VisualElement class="enemy-types">
+                        <ui:Label name="etype-melee" text="× 0 MELEE" class="etype" />
+                        <ui:Label name="etype-ranged" text="× 0 RANGED" class="etype ranged-type" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============ BOTTOM-LEFT: combo popup ============ -->
+        <ui:VisualElement class="hud hud-bl" picking-mode="Ignore">
+            <ui:VisualElement name="combo-panel" class="combo-panel">
+                <ui:VisualElement class="combo-block">
+                    <ui:Label name="combo-num" text="0" class="combo-num" />
+                    <ui:Label name="combo-label" text="HIT COMBO" class="combo-label" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Bottom-right input strip lives in InputStrip.uxml, loaded by HUD.cs
+             into its own UIDocument so its root can anchor reliably (the
+             NeonHUD root doesn't propagate size to absolute children). -->
+
+        <!-- ============ CENTER: event banner ============ -->
+        <ui:VisualElement name="event-banner" class="event-banner" picking-mode="Ignore">
+            <ui:Label name="eb-line" text="" class="eb-line" />
+            <ui:Label name="eb-sub" text="" class="eb-sub" />
+        </ui:VisualElement>
+
+        <!-- Full-screen edge effects (gold Unstoppable frame and red hit-flash)
+             live in their own UIDocument managed by ScreenBorderOverlay, not
+             this document — the overlay enforces mutex between the two modes
+             and renders on a higher-sorting panel so it always paints on top
+             of HUD chrome. -->
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,694 @@
+/* ============================================================
+   Neon Brawler HUD — UI Toolkit (USS) port.
+
+   Differences from the HTML/CSS source:
+   - clip-path polygons: replaced by Painter2D-drawn custom elements
+     (SkewedBar, Pip, CutCornerFrame).
+   - Linear gradients on backgrounds: USS doesn't support; flat tints
+     are used here, and bar fills get their gradient inside the
+     custom mesh draws.
+   - @keyframes: not supported in USS — looping effects (criticalFlash,
+     chargeShift, currentPip pulse, banner bob) are driven by HudController
+     using IVisualElementScheduledItem callbacks or by toggling classes.
+   - Transitions (USS supports `transition-*`) handle the one-shot
+     fade/slide of the banner and the dim/lit state of ability slots.
+   ============================================================ */
+
+/* ============ fonts ============ */
+/* Set the default body face on the root; descendants inherit unless overridden. */
+.game {
+    -unity-font-definition: url("Fonts/BarlowCondensed-Regular.ttf");
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+}
+
+/* Display face for big bold headlines (Bebas Neue only ships one weight; it's
+   already heavy so `-unity-font-style: bold` would over-emboss it). */
+.player-name, .bar-tag, .wave-word, .wave-num, .wave-of,
+.et-now, .et-sep, .et-tot, .combo-num, .combo-label, .eb-line {
+    -unity-font-definition: url("Fonts/BebasNeue-Regular.ttf");
+    -unity-font-style: normal;
+}
+
+/* Mono face for technical / spec-style text */
+.mono, .bar-val, .bar-max, .wave-eyebrow, .et-label, .etype,
+.ks-key, .ks-lbl, .ab-key, .eb-sub {
+    -unity-font-definition: url("Fonts/JetBrainsMono-Regular.ttf");
+}
+
+.hud {
+    position: absolute;
+}
+
+.hud-tl { top: 24px;    left: 28px; }
+.hud-tr { top: 24px;    right: 28px; align-items: flex-end; }
+.hud-bl { bottom: 24px; left: 28px; }
+.hud-br { bottom: 24px; right: 28px; }
+
+.scanlines {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.02);
+    /* USS has no repeating-linear-gradient; subtle constant tint approximates the
+       scanline mood while staying under the 1% threshold the design uses. */
+}
+
+/* ============ Unstoppable chrome pulse ============
+   The chrome-border gold pulse during Unstoppable retints existing 1px
+   outlines on the enemy tracker, input strip, ability slots, and keycaps
+   — HUD.cs sets borderColor inline. There is no class declaration to
+   support that; it just retints whatever borders the chrome already has.
+
+   The screen-edge effects (gold ultimate ring, red hit flash) used to
+   live in this stylesheet but moved to their own UIDocument owned by
+   ScreenBorderOverlay. Yoga did not propagate the main panel's size to
+   the absolute-positioned screen edges here, so they lived in a fresh
+   panel where Unity sizes the root directly from PanelSettings. */
+
+/* ============ player panel ============ */
+.player-panel {
+    flex-direction: row;
+}
+
+.player-panel .portrait {
+    width: 96px;
+    height: 110px;
+    margin-right: 14px;
+}
+
+.portrait-frame {
+    width: 96px;
+    height: 110px;
+    background-color: rgba(11, 13, 19, 0.95);
+}
+
+.portrait-inner {
+    position: absolute;
+    left: 4px; right: 4px; top: 4px; bottom: 4px;
+    background-color: #14182a;
+    overflow: hidden;
+}
+
+.portrait-silhouette {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 4%;
+    bottom: 0;
+    background-image: url("../../playerportrait.png");
+    background-size: contain;
+    background-position-x: center;
+    background-position-y: bottom;
+    background-repeat: no-repeat;
+}
+
+.portrait-scan {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.18);
+}
+
+/* stats column */
+.player-stats {
+    flex-direction: column;
+    min-width: 380px;
+    justify-content: center;
+}
+
+.player-id {
+    flex-direction: row;
+    align-items: baseline;
+    margin-bottom: 4px;
+}
+
+.player-name {
+    font-size: 26px;
+    letter-spacing: 2px;
+    color: #f4f1ea;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.7);
+    -unity-text-outline-width: 0.6px;
+}
+
+/* bar row layout: label | bar | optional icons */
+.bar-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.bar-label {
+    width: 80px;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: 10px;
+}
+
+.bar-tag {
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #f4f1ea;
+}
+
+.bar-tag.chg {
+    color: #43e6ff;
+}
+
+.bar-val-row {
+    flex-direction: row;
+    align-items: baseline;
+}
+
+.bar-val {
+    font-size: 12px;
+    color: #b9b3a4;
+    letter-spacing: 1px;
+}
+
+.bar-max {
+    font-size: 12px;
+    color: #6e6a5e;
+    letter-spacing: 1px;
+}
+
+.mono {
+    -unity-font-style: normal;
+}
+
+/* The bars themselves are SkewedBar custom elements — they draw their own
+   track/fill/border via Painter2D, so we only need to give them a flex size. */
+.bar {
+    width: 240px;
+    height: 18px;
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+/* Critical state — the controller adds `critical` to player-panel; we drive the
+   wash via class toggling on the SkewedBar in C# (cannot animate via @keyframes
+   in USS). */
+.player-panel.critical .bar-tag {
+    color: #ff2d4a;
+}
+
+/* ability icons */
+.ability-icons {
+    flex-direction: row;
+    margin-left: 4px;
+}
+
+.ability {
+    width: 30px;
+    height: 30px;
+    background-color: #0a0c12;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: #6e6a5e;
+    border-right-color: #6e6a5e;
+    border-top-color: #6e6a5e;
+    border-bottom-color: #6e6a5e;
+    justify-content: center;
+    align-items: center;
+    margin-right: 4px;
+    opacity: 0.45;
+    transition: opacity 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+.ability.lit {
+    opacity: 1;
+    background-color: #001823;
+    border-left-color: #43e6ff;
+    border-right-color: #43e6ff;
+    border-top-color: #43e6ff;
+    border-bottom-color: #43e6ff;
+}
+
+.ability.lit-accent {
+    opacity: 1;
+    background-color: #18030a;
+    border-left-color: #ff2d4a;
+    border-right-color: #ff2d4a;
+    border-top-color: #ff2d4a;
+    border-bottom-color: #ff2d4a;
+}
+
+.ab-glyph {
+    font-size: 16px;
+    color: #b9b3a4;
+    -unity-text-align: middle-center;
+}
+
+.ability.lit .ab-glyph {
+    color: #43e6ff;
+}
+
+.ability.lit-accent .ab-glyph {
+    color: #ff2d4a;
+}
+
+.ab-key {
+    position: absolute;
+    bottom: -8px;
+    right: -2px;
+    font-size: 8px;
+    color: #b9b3a4;
+    background-color: #000000;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: #6e6a5e;
+    border-right-color: #6e6a5e;
+    border-top-color: #6e6a5e;
+    border-bottom-color: #6e6a5e;
+    padding-left: 2px;
+    padding-right: 2px;
+    letter-spacing: 1px;
+}
+
+/* ── Ultimate ─────────────────────────────────────────────── */
+
+.bar-tag.ult {
+    color: #ffd76b;
+}
+
+/* Anticipation cue: thin warm edge above the row while charge >= 80%. */
+.bar-row.ult-arming {
+    border-top-width: 1px;
+    border-top-color: rgba(255, 200, 80, 0.45);
+}
+
+/* Passive badge variant — no key-cap framing because there's no input bound. */
+.ab-key.passive {
+    background-color: rgba(0, 0, 0, 0);
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    color: #ffd76b;
+    font-size: 8px;
+    letter-spacing: 1px;
+}
+
+.ability.lit-ult {
+    opacity: 1;
+    background-color: #1a1206;
+    border-left-color: #ffd76b;
+    border-right-color: #ffd76b;
+    border-top-color: #ffd76b;
+    border-bottom-color: #ffd76b;
+}
+
+.ability.lit-ult .ab-glyph {
+    color: #ffd76b;
+}
+
+/* ============ wave panel ============ */
+.wave-panel {
+    min-width: 360px;
+    align-items: flex-end;
+}
+
+.wave-header {
+    margin-bottom: 8px;
+    align-items: flex-end;
+}
+
+.wave-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #6e6a5e;
+    margin-bottom: 2px;
+}
+
+.wave-title {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.wave-word {
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: #f4f1ea;
+    margin-right: 8px;
+}
+
+.wave-num {
+    font-size: 64px;
+    color: #ff2d4a;
+    letter-spacing: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.6);
+    -unity-text-outline-width: 0.8px;
+    text-shadow: 0 0 16px rgba(255, 45, 74, 0.7);
+}
+
+.wave-of {
+    font-size: 28px;
+    color: #6e6a5e;
+    letter-spacing: 1px;
+    margin-left: 4px;
+}
+
+.wave-progress {
+    margin-bottom: 14px;
+    align-items: flex-end;
+}
+
+.wave-pips {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+/* pips are Pip custom elements — width/height drive their geometry. */
+.pip {
+    width: 36px;
+    height: 8px;
+    margin-left: 4px;
+}
+
+.pip.boss {
+    width: 22px;
+    height: 22px;
+    margin-left: 6px;
+    margin-bottom: -8px;
+}
+
+/* enemy tracker */
+.enemy-tracker {
+    background-color: rgba(10, 12, 18, 0.85);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-top-width: 2px;
+    border-left-color: rgba(255, 255, 255, 0.08);
+    border-right-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    border-top-color: #ff2d4a;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    min-width: 340px;
+}
+
+.enemy-tracker-corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    background-color: #ff2d4a;
+    /* USS can't draw the triangular nick from the design verbatim; the solid square
+       reads as a corner notch and stays visible at small sizes. */
+}
+
+.enemy-head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+}
+
+.et-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #b9b3a4;
+}
+
+.et-count {
+    flex-direction: row;
+    align-items: baseline;
+}
+
+.et-now {
+    font-size: 26px;
+    color: #ff2d4a;
+    text-shadow: 0 0 10px rgba(255, 45, 74, 0.7);
+}
+
+.et-sep {
+    font-size: 22px;
+    color: #6e6a5e;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.et-tot {
+    font-size: 22px;
+    color: #b9b3a4;
+}
+
+.enemy-bar-row {
+    flex-direction: row;
+}
+
+.enemy-bar-track {
+    flex-grow: 1;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+
+.enemy-bar-fill {
+    height: 4px;
+    background-color: #ff2d4a;
+    width: 0%;
+    transition: width 0.4s ease-out;
+}
+
+.enemy-icons {
+    flex-direction: row;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.enemy-icon {
+    width: 24px;
+    height: 24px;
+    background-color: #1a1d28;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.12);
+    border-right-color: rgba(255, 255, 255, 0.12);
+    border-top-color: rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+    justify-content: center;
+    align-items: center;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    transition: opacity 0.25s ease-out, background-color 0.25s ease-out;
+}
+
+.enemy-icon Label {
+    font-size: 12px;
+    color: #ff2d4a;
+    -unity-text-align: middle-center;
+}
+
+.enemy-icon.ranged {
+    border-left-color: #ffcf4d;
+    border-right-color: #ffcf4d;
+    border-top-color: #ffcf4d;
+    border-bottom-color: #ffcf4d;
+}
+
+.enemy-icon.ranged Label {
+    color: #ffcf4d;
+}
+
+.enemy-icon.down {
+    opacity: 0.25;
+    background-color: #0a0c12;
+    border-left-color: rgba(255, 255, 255, 0.05);
+    border-right-color: rgba(255, 255, 255, 0.05);
+    border-top-color: rgba(255, 255, 255, 0.05);
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.enemy-icon.down Label {
+    color: #6e6a5e;
+}
+
+.enemy-types {
+    flex-direction: row;
+    margin-top: 10px;
+}
+
+.etype {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #b9b3a4;
+    margin-right: 12px;
+}
+
+.etype.ranged-type {
+    color: #ffcf4d;
+}
+
+/* ============ combo popup (bottom-left) ============ */
+.combo-panel {
+    flex-direction: column;
+    align-items: flex-start;
+    opacity: 0;
+    transition: opacity 0.25s ease-out, translate 0.25s ease-out;
+    translate: 0 8px;
+}
+
+.combo-panel.visible {
+    opacity: 1;
+    translate: 0 0;
+}
+
+.combo-block {
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.combo-num {
+    font-size: 72px;
+    color: #ffcf4d;
+    margin-right: 10px;
+    -unity-text-outline-color: #000000;
+    -unity-text-outline-width: 1.2px;
+    text-shadow: 0 4px 0 rgba(0, 0, 0, 0.9);
+}
+
+.combo-label {
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: #f4f1ea;
+    margin-bottom: 12px;
+}
+
+/* ============ input strip (bottom-right) ============ */
+.input-strip {
+    /* Loaded into its own UIDocument (InputStrip.uxml) so the strip's root
+       inherits dimensions directly from a fresh panel — the main NeonHUD
+       root fails to propagate size to absolute children, which collapsed
+       this element to 0×0 when it lived inside there.
+
+       Anchored bottom-LEFT rather than bottom-right because right-anchoring
+       requires Yoga to compute `parent.width - contentWidth - right`, and
+       that derivation is flaky in this panel (the same class of bug that
+       broke the earlier four-edge approach). `left` is a direct offset
+       from the parent's origin and renders reliably. */
+    position: absolute;
+    bottom: 24px;
+    left: 28px;
+    flex-direction: row;
+    background-color: rgba(10, 12, 18, 0.85);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.08);
+    border-right-color: rgba(255, 255, 255, 0.08);
+    border-top-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    /* Existing 1px border stays at default colour; HUD.cs swaps to a gold
+       tint during Unstoppable. Width unchanged → no layout shift. */
+}
+
+.ks {
+    flex-direction: row;
+    align-items: center;
+    padding-right: 10px;
+    margin-right: 6px;
+    border-right-width: 1px;
+    border-right-color: rgba(255, 255, 255, 0.06);
+}
+
+.ks-key {
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    background-color: #161a24;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: #6e6a5e;
+    border-right-color: #6e6a5e;
+    border-top-color: #6e6a5e;
+    border-bottom-color: #6e6a5e;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: #f4f1ea;
+    margin-right: 6px;
+    min-width: 38px;
+    -unity-text-align: middle-center;
+}
+
+.ks-lbl {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #b9b3a4;
+}
+
+/* ============ event banner ============ */
+.event-banner {
+    position: absolute;
+    /* Centred near the vertical midpoint of the 1080px reference height. Pixel
+       value rather than % or top/bottom:0 stretch + justify-content — both of
+       those collapse the banner to 0 height inside .game's nested absolute
+       layout, which stacks eb-line and eb-sub at the top edge. The fixed value
+       puts the banner content visually centred; ScaleWithScreenSize handles
+       runtime scaling. Tuned for the current text sizes (~110px content). */
+    top: 480px;
+    left: 0;
+    right: 0;
+    align-items: center;
+    opacity: 0;
+    translate: 0 -8px;
+    transition: opacity 0.35s ease-out, translate 0.35s ease-out;
+}
+
+.event-banner.visible {
+    opacity: 1;
+    translate: 0 0;
+}
+
+.eb-line {
+    font-size: 76px;
+    letter-spacing: 8px;
+    color: #ff2d4a;
+    -unity-text-outline-color: #000000;
+    -unity-text-outline-width: 1px;
+    text-shadow: 0 0 18px rgba(255, 45, 74, 0.7);
+    -unity-text-align: middle-center;
+}
+
+.eb-sub {
+    font-size: 22px;
+    letter-spacing: 12px;
+    color: #b9b3a4;
+    margin-top: 8px;
+    -unity-text-align: middle-center;
+}
+
+/* victory + KO variants — controller swaps these */
+.event-banner.victory .eb-line {
+    color: #ffcf4d;
+    text-shadow: 0 0 22px rgba(255, 207, 77, 0.8);
+}
+
+.event-banner.ko .eb-line {
+    color: #43e6ff;
+    text-shadow: 0 0 22px rgba(67, 230, 255, 0.6);
+}
+
+/* generic hidden marker (used by combo + banner) */
+.hidden {
+    opacity: 0;
+}
