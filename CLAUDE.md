@@ -49,12 +49,13 @@ Assets/
 Script layout (all namespaces under `HackSlash.*`):
 ```
 Assets/Scripts/
-  Core/           # Faction, IDamageable, Health, Hitbox, GroundCheck, GameManager
-  Player/         # PlayerController, PlayerCombat, PlayerHealth
+  Core/           # Faction, IDamageable, IAbilityOwner, IMoveInputProvider, Health, Hitbox, GroundCheck, GameManager
+  Abilities/      # Ability, TimedStrikeAbility, MeleeSwingAbility, PunchAbility, WhipAbility,
+                  # ShootAbility, DodgeAbility, ChargeDashAbility, MeleeComboCoordinator
+  Player/         # PlayerController, PlayerHealth
   Enemies/        # EnemyBase, MeleeEnemy, RangedEnemy, Projectile
   Waves/          # WaveDefinition (SO), WaveSpawner
   UI/             # HUD
-  Editor/         # SampleSceneBuilder (menu: 111Percent → Build Sample Scene)
 ```
 
 ## Conventions
@@ -71,20 +72,31 @@ Assets/Scripts/
 **Core (`HackSlash.Core`)**
 - `Faction` enum (Player / Enemy)
 - `IDamageable` + `DamageInfo` struct (amount, source faction, origin, knockback)
-- `Health` — HP, invulnerability window, `Damaged` / `Died` events, faction-aware damage filtering, `InvulnerableOverride` for dodge i-frames
+- `IAbilityOwner` — character-agnostic contract abilities depend on (Faction, Facing). Implemented by `PlayerController` and `EnemyBase`.
+- `IMoveInputProvider` — optional `MoveInputX` provider (player only) so Dodge picks input direction; enemies omit it and Dodge falls back to Facing.
+- `Health` — HP, invulnerability window, `Damaged` / `Died` events, faction-aware damage filtering, `InvulnerableOverride`, `SetInvulnerableFor(seconds)` shared i-frame API used by Dodge/ChargeDash on any character.
 - `Hitbox` — manual `Physics2D.OverlapBoxNonAlloc` strike, owner-faction filter, per-swing dedupe so a single swing can't double-hit, gizmo
 - `GroundCheck` — overlap-circle probe driven from `FixedUpdate`
 - `GameManager` — singleton, player registration, scene restart on player death and on all-waves-cleared
 
+**Abilities (`HackSlash.Abilities`)** — character-agnostic: every class below works on any character that implements `IAbilityOwner`. Drop one as a component on the GameObject and it self-wires via `GetComponentInParent`.
+- `Ability` — abstract MonoBehaviour base: cooldown, `IsReady` / `IsActive` / `IsLocked`, `TryActivate()` template method, virtual `Cancel()`.
+- `TimedStrikeAbility` — abstract refinement of the windup→strike→recovery pattern. Subclasses implement `OnStrike()`. `Cancel()` aborts a pending strike (mid-windup interrupt).
+- `MeleeSwingAbility` — generic single melee swing; aligns its `Hitbox.Owner` with the host's `Faction` on Awake.
+- `PunchAbility` / `WhipAbility` — distinct subclasses of `MeleeSwingAbility` so the combo coordinator can address each by type. `WhipAbility` is gated by an optional `MeleeComboCoordinator`.
+- `ShootAbility` — spawns a `Projectile` whose direction comes from `owner.Facing` and whose faction tag comes from `owner.Faction`.
+- `DodgeAbility` — burst velocity + i-frames via `Health.SetInvulnerableFor`. Uses input direction from `IMoveInputProvider` when available, else `Facing`.
+- `ChargeDashAbility` — hold-to-charge with sprite flash, then dash with i-frames and a per-enemy-once OverlapBox scan; reads faction from owner.
+- `MeleeComboCoordinator` — small router (not an Ability) that composes any two `MeleeSwingAbility` instances into a 2-hit chain with input buffering and a combo window.
+
 **Player (`HackSlash.Player`)**
-- `PlayerController` — new Input System via `PlayerInput` SendMessages (`OnMove`/`OnJump`/`OnAttack`/`OnDodge`/`OnSecondaryAttack`); fixed-speed horizontal movement, single jump w/ grounded check, dodge (burst velocity + i-frames + cooldown), charge-dash secondary (hold-to-charge, sprite color flash, then horizontal dash at 1.5× dodge distance with i-frames and per-enemy-once damage scan); writes `Speed`/`Grounded`/`VerticalVelocity` to the Animator; auto-registers with `GameManager`
-- `PlayerCombat` — 2-hit combo (`Attack_Punch` → `Attack_Whip`), input buffering during the active swing, combo window after, timer-based strike (no animation events required)
-- `PlayerHealth` — wraps `Health`, fires `Hurt` trigger / `Dead` bool on the Animator, dodge invulnerability hook, brief hitstun
+- `PlayerController` — implements `IAbilityOwner` + `IMoveInputProvider`. Handles input dispatch (`OnMove`/`OnJump`/`OnAttack`/`OnDodge`/`OnSecondaryAttack`), movement, jump, facing, locomotion Animator. Delegates attacks to a `MeleeComboCoordinator` and skills to `DodgeAbility` / `ChargeDashAbility` references. Auto-registers with `GameManager`.
+- `PlayerHealth` — wraps `Health`, fires `Hurt` / `Dead` Animator triggers, brief hitstun, forwards `SetInvulnerable` to `Health.SetInvulnerableFor`.
 
 **Enemies (`HackSlash.Enemies`)**
-- `EnemyBase` — abstract: shared health, hitstun, knockback, facing, locomotion-anim wiring, corpse cleanup, `Defeated` event, virtual `CancelAttack()` hook
-- `MeleeEnemy` — chase → windup → timer-driven strike → recovery → cooldown. `CancelAttack` drops the pending strike when interrupted, so getting hit mid-windup negates damage.
-- `RangedEnemy` — kites to a preferred distance, retreats inside a closer band, windup → timer-driven projectile spawn → recovery. Same interrupt behavior.
+- `EnemyBase` — abstract: implements `IAbilityOwner` (faction=Enemy, exposes `Facing`). Shared health, hitstun, knockback, locomotion-anim wiring, corpse cleanup, `Defeated` event. Default `CancelAttack()` iterates `GetComponentsInChildren<Ability>()` and calls `Cancel()` on each so mid-windup hits interrupt any attached ability.
+- `MeleeEnemy` — chase AI only; delegates attack execution to a serialized `MeleeSwingAbility`.
+- `RangedEnemy` — kiting AI only; delegates fire execution to a serialized `ShootAbility`.
 - `Projectile` — kinematic 2D rigidbody, layer-masked trigger, faction-checked damage, despawn on solid or on hit
 
 **Waves (`HackSlash.Waves`)**
@@ -93,14 +105,6 @@ Assets/Scripts/
 
 **UI (`HackSlash.UI`)**
 - `HUD` — health bar, wave label, status label (defeated/victory)
-
-**Editor tooling**
-- `SampleSceneBuilder` — menu **111Percent → Build Sample Scene**. One click generates:
-  - `Assets/Generated/Animators/` — `HeroAnimator`, `MeleeEnemyAnimator`, `RangedEnemyAnimator` (states + parameters + transitions wired to the existing `.anim` clips)
-  - `Assets/Generated/Prefabs/` — `Player`, `MeleeEnemy`, `RangedEnemy`, `Projectile`
-  - `Assets/Generated/Waves/` — `Wave1`, `Wave2`, `Wave3` (ramping difficulty)
-  - Rebuilds `SampleScene` with camera, ground + walls, 3 spawn points, player, `GameManager`, `WaveSpawner`, HUD canvas, and an `EventSystem` driven by `InputSystemUIInputModule`
-- Ensures custom layers `Ground` (6) / `Player` (7) / `Enemy` (8) / `Projectile` (9) exist in the Tag Manager
 
 **Input**
 - Added a `Dodge` action to `InputSystem_Actions.inputactions` bound to **Left Shift** (keyboard) and **gamepad east button**
@@ -116,9 +120,8 @@ Assets/Scripts/
 ### How to run
 1. Open the project in Unity 6000.3.15f1
 2. Let scripts compile
-3. Top menu → **111Percent → Build Sample Scene**
-4. Open `Assets/Scenes/SampleScene` and press Play
+3. Open `Assets/Scenes/SampleScene` and press Play
 
 ### Notes
-- Strikes are fired on timers (`strikeTimings` on `PlayerCombat`, `attackWindup` on enemies) rather than animation events, so the existing `.anim` clips don't need to be modified.
-- The editor builder is idempotent: running it again wipes `SampleScene`'s contents and regenerates everything in `Assets/Generated/`.
+- Strikes are fired on timers (`windup` + `recovery` on `TimedStrikeAbility` subclasses) rather than animation events, so the existing `.anim` clips don't need to be modified.
+- Abilities are character-agnostic: dropping a `ShootAbility` onto the Player or a `DodgeAbility` onto an enemy works without code changes because each ability reads `Faction` and `Facing` from its host's `IAbilityOwner` implementation.

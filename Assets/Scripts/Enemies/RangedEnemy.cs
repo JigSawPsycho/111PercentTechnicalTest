@@ -1,4 +1,4 @@
-using HackSlash.Core;
+using HackSlash.Abilities;
 using UnityEngine;
 
 namespace HackSlash.Enemies
@@ -11,19 +11,7 @@ namespace HackSlash.Enemies
         [SerializeField] private float retreatDistance = 4f;
 
         [Header("Shooting")]
-        [SerializeField] private Projectile projectilePrefab;
-        [SerializeField] private Transform muzzle;
-        [SerializeField] private float shootCooldown = 1.8f;
-        [SerializeField] private float shootWindup = 0.3f;
-        [SerializeField] private float shootRecovery = 0.35f;
-        [SerializeField] private float projectileSpeed = 9f;
-        [SerializeField] private float projectileDamage = 8f;
-        [SerializeField] private string shootTrigger = "Shoot";
-
-        private float nextShotAt;
-        private float shootLockUntil;
-        private float fireAt;
-        private bool shotFired;
+        [SerializeField] private ShootAbility shootAbility;
 
         private void FixedUpdate()
         {
@@ -42,7 +30,7 @@ namespace HackSlash.Enemies
             float dirToPlayer = Mathf.Sign(dx);
             float vx = 0f;
 
-            bool locked = InHitstun || Time.time < shootLockUntil;
+            bool locked = InHitstun || (shootAbility != null && shootAbility.IsActive);
 
             if (!locked)
             {
@@ -50,43 +38,13 @@ namespace HackSlash.Enemies
                     vx = -dirToPlayer * moveSpeed;
                 else if (dist > preferredDistance + distanceTolerance)
                     vx = dirToPlayer * moveSpeed;
-                else if (Time.time >= nextShotAt)
-                    StartShot();
+                else if (shootAbility != null)
+                    shootAbility.TryActivate();
             }
 
             FaceTowards(dx);
             rb.linearVelocity = new Vector2(vx, rb.linearVelocity.y);
             UpdateLocomotionAnimator(vx);
-
-            if (!shotFired && Time.time >= fireAt && Time.time < shootLockUntil)
-            {
-                shotFired = true;
-                Fire();
-            }
-        }
-
-        private void StartShot()
-        {
-            shootLockUntil = Time.time + shootWindup + shootRecovery;
-            fireAt = Time.time + shootWindup;
-            shotFired = false;
-            nextShotAt = Time.time + shootCooldown;
-            if (animator != null) animator.SetTrigger(shootTrigger);
-        }
-
-        private void Fire()
-        {
-            if (projectilePrefab == null) return;
-            Transform origin = muzzle != null ? muzzle : transform;
-            Vector2 dir = new Vector2(facing, 0f);
-            var p = Instantiate(projectilePrefab, origin.position, Quaternion.identity);
-            p.Launch(dir, projectileSpeed, projectileDamage, Faction.Enemy);
-        }
-
-        protected override void CancelAttack()
-        {
-            shotFired = true;
-            shootLockUntil = 0f;
         }
     }
 }

@@ -160,6 +160,7 @@ GameObject:
   - component: {fileID: 4093084271548489937}
   - component: {fileID: 3974535214931497486}
   - component: {fileID: 409616964175350905}
+  - component: {fileID: 1111111111111111301}
   m_Layer: 8
   m_Name: RangedEnemy
   m_TagString: Untagged
@@ -305,14 +306,28 @@ MonoBehaviour:
   preferredDistance: 6
   distanceTolerance: 0.5
   retreatDistance: 4
+  shootAbility: {fileID: 1111111111111111301}
+--- !u!114 &1111111111111111301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5550768774477616375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a0491d2c215431cbb13c2656334d9c6, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.ShootAbility
+  cooldown: 1.8
+  windup: 0.3
+  recovery: 0.35
+  animator: {fileID: 4757260406765054077}
+  animatorTrigger: Shoot
   projectilePrefab: {fileID: 6067868589485091022, guid: a0b945da641693249b235f36a94db994, type: 3}
   muzzle: {fileID: 4547699828142094968}
-  shootCooldown: 1.8
-  shootWindup: 0.3
-  shootRecovery: 0.35
   projectileSpeed: 9
   projectileDamage: 8
-  shootTrigger: Shoot
 --- !u!1 &7514689666413658809
 GameObject:
   m_ObjectHideFlags: 0

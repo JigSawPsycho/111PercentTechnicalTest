@@ -160,6 +160,7 @@ GameObject:
   - component: {fileID: 5047670430791751876}
   - component: {fileID: 4777867420255584976}
   - component: {fileID: 7025210390763616434}
+  - component: {fileID: 1111111111111111201}
   m_Layer: 8
   m_Name: MeleeEnemy
   m_TagString: Untagged
@@ -303,11 +304,25 @@ MonoBehaviour:
   hurtTrigger: Hurt
   deadBool: Dead
   attackRange: 1.2
-  attackCooldown: 1.2
-  attackWindup: 0.25
-  attackRecovery: 0.45
+  attackAbility: {fileID: 1111111111111111201}
+--- !u!114 &1111111111111111201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8051722839555853046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9016a99c55944f6a9b631e19a657f9cd, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::HackSlash.Abilities.MeleeSwingAbility
+  cooldown: 1.2
+  windup: 0.25
+  recovery: 0.45
+  animator: {fileID: 2833869098459544275}
+  animatorTrigger: Attack1
   hitbox: {fileID: 8623516941419314555}
-  attackTrigger: Attack1
 --- !u!1 &8075615307954104807
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,7 +11,6 @@ namespace HackSlash.Player
         [SerializeField] private string deadBool = "Dead";
 
         private Health health;
-        private float invulnerableUntil;
 
         public Health Health => health;
         public bool IsAlive => health != null && health.IsAlive;
@@ -36,14 +35,7 @@ namespace HackSlash.Player
 
         public void SetInvulnerable(float seconds)
         {
-            invulnerableUntil = Mathf.Max(invulnerableUntil, Time.time + seconds);
-            health.InvulnerableOverride = true;
-        }
-
-        private void Update()
-        {
-            if (health.InvulnerableOverride && Time.time >= invulnerableUntil)
-                health.InvulnerableOverride = false;
+            if (health != null) health.SetInvulnerableFor(seconds);
         }
 
         private void HandleDamaged(DamageInfo info)

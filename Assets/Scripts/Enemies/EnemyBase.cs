@@ -1,3 +1,4 @@
+using HackSlash.Abilities;
 using HackSlash.Core;
 using UnityEngine;
 
@@ -5,7 +6,7 @@ namespace HackSlash.Enemies
 {
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Health))]
-    public abstract class EnemyBase : MonoBehaviour
+    public abstract class EnemyBase : MonoBehaviour, IAbilityOwner
     {
         [Header("Common")]
         [SerializeField] protected float moveSpeed = 2.5f;
@@ -30,6 +31,8 @@ namespace HackSlash.Enemies
 
         public bool IsDead => isDead;
         public Health Health => health;
+        public Faction Faction => Faction.Enemy;
+        public int Facing => facing;
 
         public event System.Action<EnemyBase> Defeated;
 
@@ -77,10 +80,14 @@ namespace HackSlash.Enemies
         }
 
         /// <summary>
-        /// Drop any pending strike/shot so a hit mid-windup interrupts the attack.
-        /// Subclasses override to clear their attack-specific timers.
+        /// Cancels every Ability on this enemy so a mid-windup hit interrupts the swing/shot.
         /// </summary>
-        protected virtual void CancelAttack() { }
+        protected virtual void CancelAttack()
+        {
+            var abilities = GetComponentsInChildren<Ability>();
+            for (int i = 0; i < abilities.Length; i++)
+                abilities[i].Cancel();
+        }
 
         protected virtual void HandleDied()
         {

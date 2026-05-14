@@ -12,6 +12,7 @@ namespace HackSlash.Core
         private float current;
         private float invulnerableUntil;
         private bool invulnerable;
+        private float overrideUntil;
 
         public event Action<DamageInfo> Damaged;
         public event Action Died;
@@ -31,6 +32,25 @@ namespace HackSlash.Core
         private void Awake()
         {
             current = maxHealth;
+        }
+
+        /// <summary>
+        /// Grant invulnerability for a duration. Stacks by taking the longest window
+        /// so overlapping abilities (e.g. dodge into charge-dash) don't shorten i-frames.
+        /// </summary>
+        public void SetInvulnerableFor(float seconds)
+        {
+            overrideUntil = Mathf.Max(overrideUntil, Time.time + seconds);
+            invulnerable = true;
+        }
+
+        private void Update()
+        {
+            if (invulnerable && overrideUntil > 0f && Time.time >= overrideUntil)
+            {
+                invulnerable = false;
+                overrideUntil = 0f;
+            }
         }
 
         public void TakeDamage(DamageInfo info)
